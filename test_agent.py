@@ -1,28 +1,34 @@
-from smart_agent.agents.agents import Agent
-from smart_agent.llm_clients.llm_client import LangChainProvider
-from smart_agent.models.llm_model import LLMConfig
-from smart_agent.tools.hacker_news import HackerNewsTools
-from smart_agent.tools.news_api import NewsAPIClient
-from smart_agent.tools.stock_tools import StockPriceTool
-from smart_agent.tools.weather_tools import WeatherTool
+from getpass import getpass
+
+from quancri.agents.agents import Agent
+from quancri.llm_clients.llm_client import LangChainProvider
+from quancri.models.llm_model import LLMConfig
+from quancri.tools.hacker_news import HackerNewsTools
+from quancri.tools.news_api import NewsAPIClient
+from quancri.tools.stock_tools import StockPriceTool
+from quancri.tools.weather_tools import WeatherTool
 
 import os
 
 # Example usage:
 async def main():
+    if "GROQ_API_KEY" not in os.environ:
+        os.environ["GROQ_API_KEY"] = getpass("Enter your Groq API key: ")
+
+    if "NEWS_API_KEY" not in os.environ:
+        os.environ["NEWS_API_KEY"] = getpass("Enter your News API key: ")
     try:
         llm_config = LLMConfig(
-            api_key="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",
+            api_key="",
             model="deepseek-r1-distill-llama-70b",
             temperature=0.1
         )
         llm_provider = LangChainProvider(llm_config)
         agent = Agent(llm_provider)
-        # Initialize agent with GPT interface
 
         # # Register tools
         agent.register_tool(StockPriceTool())
-        agent.register_tool(NewsAPIClient(api_key="8182bcdf63354d8a8e76b8bef85c12f0"))
+        agent.register_tool(NewsAPIClient(api_key=os.environ["NEWS_API_KEY"]))
         # agent.register_tool(WeatherTool())
         #
         # # Process question
@@ -62,8 +68,6 @@ async def main():
         # response = await weather_agent.process_question(question)
         # print(f"Weather Response: {response}")
 
-        # agent.register_tool(StockPriceTool())
-        # agent.register_tool(HackerNewsTools())
         # question = "What are the newest 100 stories in tech on Hacker News and are any of those relates to Apple stock and do those have any impact on the stock price potentially?"
         # response = await agent.process_question(question)
         # print(f"Hacker News Response: {response}")
